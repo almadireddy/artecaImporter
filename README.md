@@ -1,5 +1,9 @@
 # Arteca Supplementary Content Import Prep
 
+#### Created for the ARTECA Project 
+
+[arteca.mit.edu](arteca.mit.edu)
+
 ## Usage
 
 Simply run the python file in the directory with all the journals, or inside a single issue's directory. 
@@ -40,3 +44,9 @@ Here is what it does:
 - for all the links, create the appropriate location tags based on file type
 - delete suppl/ folder, which was emptied with that move
 - write and save the new xml file and the edited .suppl file
+
+## Coming Soon
+
+We need to add support for things like youtube links, which are currently being skipped as to avoid a crash based the file not existing with the supplementary content files
+
+Another thing is packaging this into one script so it can be called from the command line without manually installing dependencies and such
