@@ -30,6 +30,7 @@ for working, subdirs, files in os.walk(rootPath):
 
                         # find all the <a> tags and make the href
                         # attribute lowercase
+                        # then put all the hrefs into the contentLinks list for later access
                         contentLinks = list()
 
                         for a in soup.find_all('a'):
@@ -44,10 +45,12 @@ for working, subdirs, files in os.walk(rootPath):
                         href = href[:-1]
                         href = "/".join(href)
 
+                        # open the existing xml file, and open a writable new xml file, and create the
+                        # beautifulSoup object
                         originalXml = open(articleDir + '/' + articleCode + '.xml')
-                        newXml = open(articleDir + '/' + articleCode + '.suppl.xml', 'wb')
                         xSoup = BeautifulSoup(originalXml, 'xml')
 
+                        # get all the tags and things we need to fill in the new xml file
                         docType = xSoup.article['dtd-version']
                         journalId = xSoup.select('journal-id[journal-id-type="publisher-id"]')[0].extract()
 
@@ -61,21 +64,24 @@ for working, subdirs, files in os.walk(rootPath):
                         articleTitle = xSoup.find('title-group').extract()
 
                         xSoup.front.clear()
-                        xSoup.front.append(xSoup.new_tag('journal-meta'))
-                        xSoup.find('journal-meta').append(journalId)
-                        xSoup.find('journal-meta').append(journalTitle)
-                        xSoup.find('journal-meta').append(xSoup.new_tag('publisher'))
+                        journalMeta = xSoup.new_tag('journal-meta')
+                        xSoup.front.append(journalMeta)
+                        journalMeta.append(journalId)
+                        journalMeta.append(journalTitle)
+                        journalMeta.append(xSoup.new_tag('publisher'))
                         xSoup.find('publisher').append(publisherName)
 
-                        xSoup.front.append(xSoup.new_tag('article-meta'))
-                        xSoup.find('article-meta').append(articleId)
-                        xSoup.find('article-meta').append(articleTitle)
-                        xSoup.find('article-meta').append(xSoup.new_tag('abstract'))
-                        xSoup.find('article-meta').append(xSoup.new_tag('location-group'))
+                        articleMeta = xSoup.new_tag('article-meta')
+                        xSoup.front.append(articleMeta)
+                        articleMeta.append(articleId)
+                        articleMeta.append(articleTitle)
+                        articleMeta.append(xSoup.new_tag('abstract'))
+                        articleMeta.append(xSoup.new_tag('location-group'))
 
                         # The path we need to create (from os root)
                         completePath = articleDir + "/" + href
 
+                        # print a status message
                         print "Currently processing: " + supplFile
 
                         # check if the directories exist, otherwise, recursively create directories.
@@ -88,8 +94,15 @@ for working, subdirs, files in os.walk(rootPath):
                         for content in os.listdir(w):
                             os.rename(w + "/" + content, completePath + "/" + content)
 
+                        # go through each link in the list of links we made earlier and put them into the new
+                        # xml file, inside the tag depending on its filetype.
+                        # if its not a file, skip it
+                        # TODO: add support for things like youtube video links
                         for link in contentLinks:
                             xSoup.find('abstract').append(soup.prettify())
+
+                            # check if the file exists (to avoid crashing in the case that
+                            # the supplementary content is something like a youtube link
                             try:
                                 fileType = magic.from_file(articleDir + link, mime=True)
                             except IOError as e:
@@ -111,17 +124,19 @@ for working, subdirs, files in os.walk(rootPath):
                                 xSoup.find('location-group').append(tag)
 
                             else:
-                                tag = xSoup.new_tag('audio')
+                                tag = xSoup.new_tag('file')
                                 tag.append(link)
                                 xSoup.find('location-group').append(tag)
-
-                        newXml.write(str(xSoup))
 
                         # remove the original suppl/ folder and .suppl file.
                         os.rmdir(w)
                         suppl.close()
                         os.remove(articleDir + '/' + supplFile)
-                        newXml.close()
+
+                        # save the new constructed xml into the second xml file.
+                        with open(articleDir + '/' + articleCode + '.suppl.xml', 'wb') as newXml:
+                            newXml.write(str(xSoup))
+                            newXml.close()
 
                         # create and save the new .suppl file with the lowercase links.
                         with open(articleDir + '/' + supplFile, 'wb') as writeFile:
