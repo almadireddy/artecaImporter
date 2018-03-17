@@ -89,6 +89,7 @@ for working, subdirs, files in os.walk(rootPath):
                             os.rename(w + "/" + content, completePath + "/" + content)
 
                         for link in contentLinks:
+                            xSoup.find('abstract').append(soup.prettify())
                             try:
                                 fileType = magic.from_file(articleDir + link, mime=True)
                             except IOError as e:
