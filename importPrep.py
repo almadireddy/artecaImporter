@@ -5,10 +5,11 @@
 # Aahlad Madireddy
 # Run this file outside the folder that contains all the issues
 # to go through each issue and all articles in it.
+# brew install libmagic before running (for filetype detection)
 
 import sys
 import os
-import copy
+import magic
 from bs4 import BeautifulSoup
 
 rootPath = os.path.dirname(sys.argv[1])
@@ -44,26 +45,22 @@ for working, subdirs, files in os.walk(rootPath):
                         href = "/".join(href)
 
                         originalXml = open(articleDir + '/' + articleCode + '.xml')
-                        # newXml = open(articleDir + '/' + articleCode + '.suppl.xml', 'wb')
+                        newXml = open(articleDir + '/' + articleCode + '.suppl.xml', 'wb')
                         xSoup = BeautifulSoup(originalXml, 'xml')
 
-                        doctype = xSoup.article['dtd-version']
-
+                        docType = xSoup.article['dtd-version']
                         journalId = xSoup.select('journal-id[journal-id-type="publisher-id"]')[0].extract()
 
-                        if (doctype == '3.0'):
+                        if docType == '3.0':
                             journalTitle = xSoup.find('journal-title-group').extract()
                         else:
                             journalTitle = xSoup.select('abbrev-journal-title[abbrev-type="full"]')[0].extract()
 
                         publisherName = xSoup.find('publisher-name').extract()
-
                         articleId = xSoup.select('article-id[pub-id-type="doi"]')[0].extract()
-
                         articleTitle = xSoup.find('title-group').extract()
 
                         xSoup.front.clear()
-
                         xSoup.front.append(xSoup.new_tag('journal-meta'))
                         xSoup.find('journal-meta').append(journalId)
                         xSoup.find('journal-meta').append(journalTitle)
@@ -76,25 +73,54 @@ for working, subdirs, files in os.walk(rootPath):
                         xSoup.find('article-meta').append(xSoup.new_tag('abstract'))
                         xSoup.find('article-meta').append(xSoup.new_tag('location-group'))
 
-                        # newXml.write(str(xSoup))
+                        # The path we need to create (from os root)
+                        completePath = articleDir + "/" + href
 
-                        # # The path we need to create (from os root)
-                        # completePath = articleDir + "/" + href
-                        #
-                        # # check if the directories exist, otherwise, recursively create directories.
-                        # if os.path.exists(completePath):
-                        #     print "Directory '" + href + "'" + " Already exists"
-                        # else:
-                        #     os.makedirs(completePath)
-                        #
-                        # # for each supplementary file, move that file into the newly created directory
-                        # for content in os.listdir(w):
-                        #     os.rename(w + "/" + content, completePath + "/" + content)
-                        #
-                        # # remove the original suppl/ folder and .suppl file.
-                        # os.rmdir(w)
-                        # suppl.close()
+                        print "Currently processing: " + supplFile
+
+                        # check if the directories exist, otherwise, recursively create directories.
+                        if os.path.exists(completePath):
+                            print "Directory '" + href + "'" + " Already exists"
+                        else:
+                            os.makedirs(completePath)
+
+                        # for each supplementary file, move that file into the newly created directory
+                        for content in os.listdir(w):
+                            os.rename(w + "/" + content, completePath + "/" + content)
+
+                        for link in contentLinks:
+                            try:
+                                fileType = magic.from_file(articleDir + link, mime=True)
+                            except IOError as e:
+                                continue
+
+                            if fileType.startswith("audio"):
+                                tag = xSoup.new_tag('audio')
+                                tag.append(link)
+                                xSoup.find('location-group').append(tag)
+
+                            elif fileType.startswith("video"):
+                                tag = xSoup.new_tag('video')
+                                tag.append(link)
+                                xSoup.find('location-group').append(tag)
+
+                            elif fileType.startswith("image"):
+                                tag = xSoup.new_tag('image')
+                                tag.append(link)
+                                xSoup.find('location-group').append(tag)
+
+                            else:
+                                tag = xSoup.new_tag('audio')
+                                tag.append(link)
+                                xSoup.find('location-group').append(tag)
+
+                        newXml.write(str(xSoup))
+
+                        # remove the original suppl/ folder and .suppl file.
+                        os.rmdir(w)
+                        suppl.close()
                         os.remove(articleDir + '/' + supplFile)
+                        newXml.close()
 
                         # create and save the new .suppl file with the lowercase links.
                         with open(articleDir + '/' + supplFile, 'wb') as writeFile:
