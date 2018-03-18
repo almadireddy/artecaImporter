@@ -99,7 +99,7 @@ for working, subdirs, files in os.walk(rootPath):
                         # if its not a file, skip it
                         # TODO: add support for things like youtube video links
                         for link in contentLinks:
-                            xSoup.find('abstract').append(soup.prettify())
+                            xSoup.find('abstract').append(soup.prettify('utf-8'))
 
                             # check if the file exists (to avoid crashing in the case that
                             # the supplementary content is something like a youtube link
