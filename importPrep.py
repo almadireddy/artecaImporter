@@ -14,11 +14,16 @@ from bs4 import BeautifulSoup
 
 rootPath = os.path.dirname(sys.argv[1])
 print sys.argv
+
+genPath = sys.argv[1] + "/generatedXMLs"
+
+if not os.path.exists(genPath):
+    os.makedirs(genPath)
+
 for working, subdirs, files in os.walk(rootPath):
     for subdir in subdirs:
         articleDir = os.path.join(working, subdir)
         supplDir = articleDir + '/suppl'
-
         # path contains the suppl/ folder, meaning it also contains a .suppl file
         if os.path.isdir(supplDir):
             for w, s, f in os.walk(supplDir):
@@ -79,7 +84,7 @@ for working, subdirs, files in os.walk(rootPath):
                         articleMeta.append(xSoup.new_tag('location-group'))
 
                         # The path we need to create (from os root)
-                        completePath = articleDir + "/" + href
+                        completePath = sys.argv[1] + "/" + href
 
                         # print a status message
                         print "Currently processing: " + supplFile
@@ -98,9 +103,8 @@ for working, subdirs, files in os.walk(rootPath):
                         # xml file, inside the tag depending on its filetype.
                         # if its not a file, skip it
                         # TODO: add support for things like youtube video links
+                        xSoup.find('abstract').append(soup.encode('utf-8', formatter=None))
                         for link in contentLinks:
-                            xSoup.find('abstract').append(soup.prettify('utf-8'))
-
                             # check if the file exists (to avoid crashing in the case that
                             # the supplementary content is something like a youtube link
                             try:
@@ -129,13 +133,13 @@ for working, subdirs, files in os.walk(rootPath):
                                 xSoup.find('location-group').append(tag)
 
                         # remove the original suppl/ folder and .suppl file.
-                        os.rmdir(w)
+                        os.rmdir(supplDir + '/')
                         suppl.close()
                         os.remove(articleDir + '/' + supplFile)
 
                         # save the new constructed xml into the second xml file.
-                        with open(articleDir + '/' + articleCode + '.suppl.xml', 'wb') as newXml:
-                            newXml.write(str(xSoup))
+                        with open(genPath + "/" + articleCode + '.suppl.xml', 'wb') as newXml:
+                            newXml.write(xSoup.encode('utf-8', formatter=None))
                             newXml.close()
 
                         # create and save the new .suppl file with the lowercase links.
