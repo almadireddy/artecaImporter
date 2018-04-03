@@ -42,9 +42,10 @@ for working, subdirs, files in os.walk(rootPath):
                         contentLinks = list()
 
                         for a in soup.find_all('a'):
-                            hr = a.get('href').lower()
-                            a['href'] = hr
-                            contentLinks.append(hr)
+                            if a.get('href').startswith('/doi'):
+                                hr = a.get('href').lower()
+                                a['href'] = hr
+                                contentLinks.append(hr)
 
                         # get the first href in the suppl file and chop off the filename at the end
                         # this gives us the directory that we need to put the content files in.
