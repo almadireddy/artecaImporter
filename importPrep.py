@@ -42,17 +42,20 @@ for working, subdirs, files in os.walk(rootPath):
                         contentLinks = list()
 
                         for a in soup.find_all('a'):
-                            if a.get('href').startswith('/doi'):
-                                hr = a.get('href').lower()
-                                a['href'] = hr
-                                contentLinks.append(hr)
+                            hr = a.get('href').lower()
+                            a['href'] = hr
+                            contentLinks.append(hr)
 
                         # get the first href in the suppl file and chop off the filename at the end
                         # this gives us the directory that we need to put the content files in.
-                        href = soup.a['href'].split('/')
-                        articleCode = href[4]
-                        href = href[:-1]
-                        href = "/".join(href)
+                        for a in soup.find_all('a'):
+                            if a.get('href').startswith('/doi'):
+                                href = soup.a['href'].split('/')
+                                articleCode = href[4]
+                                href = href[:-1]
+                                href = "/".join(href)
+
+                                break
 
                         # open the existing xml file, and open a writable new xml file, and create the
                         # beautifulSoup object
