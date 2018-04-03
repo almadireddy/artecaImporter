@@ -30,6 +30,9 @@ for working, subdirs, files in os.walk(rootPath):
                 for supplFile in os.listdir(articleDir):
                     # find the .suppl file
                     if supplFile.endswith('.suppl'):
+                        # print a status message
+                        print "Currently processing: " + " | in " + articleDir
+
                         suppl = open(articleDir + '/' + supplFile)  # open the file
                         soup = BeautifulSoup(suppl, 'html.parser')  # create soup object
 
@@ -85,9 +88,6 @@ for working, subdirs, files in os.walk(rootPath):
 
                         # The path we need to create (from os root)
                         completePath = sys.argv[1] + "/" + href
-
-                        # print a status message
-                        print "Currently processing: " + supplFile
 
                         # check if the directories exist, otherwise, recursively create directories.
                         if os.path.exists(completePath):
