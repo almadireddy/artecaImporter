@@ -43,7 +43,7 @@ for working, subdirs, files in os.walk(rootPath):
                         contentLinks = list()
 
                         for a in soup.find_all('a'):
-                            hr = a.get('href').lower()
+                            hr = a.get('href').lower().replace('\n', '')
                             a['href'] = hr
                             contentLinks.append(hr)
 
