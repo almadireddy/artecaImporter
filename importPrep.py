@@ -6,6 +6,7 @@
 # Run this file outside the folder that contains all the issues
 # to go through each issue and all articles in it.
 # brew install libmagic before running (for filetype detection)
+# test
 
 import sys
 import os
@@ -50,7 +51,7 @@ for working, subdirs, files in os.walk(rootPath):
                         # this gives us the directory that we need to put the content files in.
                         for a in soup.find_all('a'):
                             if a.get('href').startswith('/doi'):
-                                href = soup.a.get('href').split('/')
+                                href = a.get('href').split('/')
                                 articleCode = href[4]
                                 href = href[:-1]
                                 href = "/".join(href)
