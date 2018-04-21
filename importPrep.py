@@ -52,7 +52,10 @@ for working, subdirs, files in os.walk(rootPath):
                         for a in soup.find_all('a'):
                             if a.get('href').startswith('/doi'):
                                 href = a.get('href').split('/')
-                                articleCode = href[4]
+                                if any('abs' in s for s in href):
+                                    articleCode = href[5]
+                                else:
+                                    articleCode = href[4]
                                 href = href[:-1]
                                 href = "/".join(href)
 
