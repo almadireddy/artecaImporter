@@ -70,10 +70,17 @@ for working, subdirs, files in os.walk(rootPath):
                         docType = xSoup.article['dtd-version']
                         journalId = xSoup.select('journal-id[journal-id-type="publisher-id"]')[0].extract()
 
+                        if journalId == 'leon':
+                            issueID = xSoup.select('volume').extract() + "." + xSoup.select('issue').extract()
+                        elif journalId == 'lmj':
+                            issueID = xSoup.select('issue-sequence').extract()
+
                         if docType == '3.0':
                             journalTitle = xSoup.find('journal-title-group').extract()
                         else:
                             journalTitle = xSoup.select('abbrev-journal-title[abbrev-type="full"]')[0].extract()
+
+                        articleReference = issueID + " - " + journalTitle
 
                         publisherName = xSoup.find('publisher-name').extract()
                         articleId = xSoup.select('article-id[pub-id-type="doi"]')[0].extract()
@@ -91,6 +98,7 @@ for working, subdirs, files in os.walk(rootPath):
                         xSoup.front.append(articleMeta)
                         articleMeta.append(articleId)
                         articleMeta.append(articleTitle)
+                        articleMeta.append(articleReference)
                         articleMeta.append(xSoup.new_tag('abstract'))
                         articleMeta.append(xSoup.new_tag('location-group'))
 
