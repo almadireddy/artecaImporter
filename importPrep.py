@@ -77,8 +77,11 @@ for working, subdirs, files in os.walk(rootPath):
                         if journalId.getText() == 'leon':
                             issueID = xSoup.volume.getText() + "." + xSoup.issue.getText()
                         elif journalId.getText() == 'lmj':
-                            issueID = xSoup.find('issue-sequence').getText()
-
+                            year = xSoup.year.getText()
+                            if int(year) < 2015:
+                                issueID = xSoup.find('issue-sequence').getText()
+                            else:
+                                issueID = xSoup.volume.getText()
                         if docType == '3.0':
                             journalTitle = xSoup.find('journal-title-group').extract()
                         else:
