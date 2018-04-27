@@ -48,6 +48,8 @@ for working, subdirs, files in os.walk(rootPath):
 
                         # get the first href in the suppl file and chop off the filename at the end
                         # this gives us the directory that we need to put the content files in.
+                        validLinkFound = False
+
                         for a in soup.find_all('a'):
                             if a.get('href').startswith('/doi'):
                                 href = a.get('href').split('/')
@@ -58,7 +60,12 @@ for working, subdirs, files in os.walk(rootPath):
                                 href = href[:-1]
                                 href = "/".join(href)
 
+                                validLinkFound = True
+
                                 break
+
+                        if not validLinkFound:
+                            continue
 
                         # open the existing xml file, and open a writable new xml file, and create the
                         # beautifulSoup object
