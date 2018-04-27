@@ -30,7 +30,7 @@ for working, subdirs, files in os.walk(rootPath):
                 for supplFile in os.listdir(articleDir):
                     # find the .suppl file
                     if supplFile.endswith('.suppl'):
-                        articleCode = supplFile.split(".")[0]
+                        articleCode, ext = os.path.splitext(supplFile)
                         # print a status message
                         print "Currently processing: " + supplFile + " | in " + articleDir
 
