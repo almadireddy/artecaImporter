@@ -6,7 +6,6 @@
 # Run this file outside the folder that contains all the issues
 # to go through each issue and all articles in it.
 # brew install libmagic before running (for filetype detection)
-# test
 
 import sys
 import os
@@ -74,8 +73,6 @@ for working, subdirs, files in os.walk(rootPath):
                             issueID = xSoup.volume.getText() + "." + xSoup.issue.getText()
                         elif journalId.getText() == 'lmj':
                             issueID = xSoup.find('issue-sequence').getText()
-
-                        print issueID
 
                         if docType == '3.0':
                             journalTitle = xSoup.find('journal-title-group').extract()
